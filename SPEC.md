@@ -670,7 +670,7 @@ Brings up Postgres, the Spring Boot API (with Flyway migrations applied automati
 - **Accounts**: GitHub (repo + Actions), Render, Neon, Vercel — all on their free tiers.
 - **Provisioned infrastructure**: a Render web service (Docker runtime) pointed at the GHCR image, a Neon Postgres project/branch for production, and a Vercel project linked to the frontend.
 - **GitHub Actions repo secrets**:
-  - Backend: `RENDER_DEPLOY_HOOK_URL` (or `RENDER_API_KEY` + service id, if using the API instead of a deploy hook), plus the runtime env vars set directly in Render's dashboard rather than passed through Actions — `DB_URL` / `DB_USERNAME` / `DB_PASSWORD` (from Neon), `JWT_SECRET`, `FRONTEND_ORIGIN` (the deployed Vercel URL, for CORS).
+  - Backend: `RENDER_DEPLOY_HOOK_URL` (or `RENDER_API_KEY` + service id, if using the API instead of a deploy hook), plus the runtime env vars set directly in Render's dashboard rather than passed through Actions — `DB_URL` / `DB_USERNAME` / `DB_PASSWORD` (from Neon), `SHIFTSWAP_JWT_SECRET` (namespaced to avoid colliding with an unrelated `JWT_SECRET` a host machine might already have set — env vars outrank profile YAML in Spring's property precedence), `FRONTEND_ORIGIN` (the deployed Vercel URL, for CORS).
   - Frontend: `VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID`.
   - GHCR push uses the workflow's built-in `GITHUB_TOKEN` — no separate registry secret needed.
 - **Branch protection on `main`**: required status checks = CI (lint, tests, CodeQL, Trivy, gitleaks); only `main` is permitted to trigger the `cd-*` workflows (see [Threat Model](#threat-model)).

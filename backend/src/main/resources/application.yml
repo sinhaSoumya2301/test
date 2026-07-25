@@ -33,7 +33,12 @@ management:
 # See /SPEC.md "API Contract", "Tech Stack & Rationale", and docs/adr/0003-jwt-access-refresh-auth.md
 app:
   jwt:
-    secret: ${JWT_SECRET}
+    # Namespaced (not just JWT_SECRET) deliberately: OS environment variables outrank
+    # profile-specific YAML files (application-local.yml) in Spring's property precedence, so a
+    # generically-named var already set in a dev's shell for something unrelated would silently
+    # win over the intended local secret with no error — found via a real WeakKeyException when
+    # an ambient JWT_SECRET on a dev machine was 13 bytes.
+    secret: ${SHIFTSWAP_JWT_SECRET}
     access-token-ttl-seconds: 900       # 15 minutes
     refresh-token-ttl-seconds: 604800   # 7 days
   cors:

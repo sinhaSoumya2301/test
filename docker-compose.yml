@@ -37,7 +37,8 @@ services:
       DB_PASSWORD: shiftswap
       # Same intentionally-public local-dev-only value already committed in
       # backend/src/main/resources/application-local.yml — never used outside this stack.
-      JWT_SECRET: local-dev-only-secret-change-me-do-not-use-in-production-0123456789
+      # Namespaced as SHIFTSWAP_JWT_SECRET (not just JWT_SECRET) — see application.yml's comment.
+      SHIFTSWAP_JWT_SECRET: local-dev-only-secret-change-me-do-not-use-in-production-0123456789
       FRONTEND_ORIGIN: http://localhost:5173
       PORT: "8080"
     ports:

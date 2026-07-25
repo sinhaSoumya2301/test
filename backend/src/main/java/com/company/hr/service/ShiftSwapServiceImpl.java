@@ -69,7 +69,14 @@ public class ShiftSwapServiceImpl implements ShiftSwapService {
 
     @Override
     @Transactional
-    public SwapRequestResponse create(Employee requester, CreateSwapRequestDto dto) {
+    public SwapRequestResponse create(Employee requesterPrincipal, CreateSwapRequestDto dto) {
+        // requesterPrincipal comes from @CurrentUser (loaded by JwtAuthenticationFilter with no
+        // Hibernate session held open into this call) — re-fetching gives a session-bound
+        // instance so requester.getManager() below doesn't throw LazyInitializationException.
+        // Found via a real failure hitting this endpoint locally.
+        Employee requester = employeeRepository.findById(requesterPrincipal.getId()).orElseThrow(
+                () -> new ResourceNotFoundException("EMPLOYEE_NOT_FOUND", "Employee not found."));
+
         Shift requesterShift = shiftRepository.findById(dto.requesterShiftId())
                 .filter(s -> s.getEmployee().getId().equals(requester.getId()))
                 .orElseThrow(() -> new ResourceNotFoundException("SHIFT_NOT_FOUND", "Shift not found."));

@@ -1,6 +1,5 @@
 package com.company.hr.controller;
 
-import com.company.hr.mapper.EmployeeMapper;
 import com.company.hr.model.dto.request.LoginRequest;
 import com.company.hr.model.dto.request.RefreshRequest;
 import com.company.hr.model.dto.response.AuthTokenResponse;
@@ -8,6 +7,7 @@ import com.company.hr.model.dto.response.EmployeeResponse;
 import com.company.hr.model.entity.Employee;
 import com.company.hr.security.CurrentUser;
 import com.company.hr.service.AuthService;
+import com.company.hr.service.EmployeeService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,11 +19,11 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
     private final AuthService authService;
-    private final EmployeeMapper employeeMapper;
+    private final EmployeeService employeeService;
 
-    public AuthController(AuthService authService, EmployeeMapper employeeMapper) {
+    public AuthController(AuthService authService, EmployeeService employeeService) {
         this.authService = authService;
-        this.employeeMapper = employeeMapper;
+        this.employeeService = employeeService;
     }
 
     @PostMapping("/login")
@@ -44,6 +44,9 @@ public class AuthController {
 
     @GetMapping("/me")
     public ResponseEntity<EmployeeResponse> me(@CurrentUser Employee employee) {
-        return ResponseEntity.status(HttpStatus.OK).body(employeeMapper.toResponse(employee));
+        // Delegates to EmployeeService.getSelf, which re-fetches within its own transaction —
+        // the @CurrentUser instance is detached (see EmployeeServiceImpl#reattach) and its lazy
+        // department/manager associations can't be resolved directly here.
+        return ResponseEntity.status(HttpStatus.OK).body(employeeService.getSelf(employee));
     }
 }

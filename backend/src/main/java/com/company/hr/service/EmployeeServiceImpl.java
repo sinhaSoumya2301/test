@@ -23,7 +23,7 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     @Override
     public EmployeeResponse getSelf(Employee employee) {
-        return employeeMapper.toResponse(employee);
+        return employeeMapper.toResponse(reattach(employee));
     }
 
     @Override
@@ -35,12 +35,25 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     @Override
     public List<EmployeeResponse> getColleagues(Employee employee) {
-        if (employee.getManager() == null) {
+        Employee fresh = reattach(employee);
+        if (fresh.getManager() == null) {
             return List.of();
         }
-        return employeeRepository.findByManagerId(employee.getManager().getId()).stream()
-                .filter(colleague -> !colleague.getId().equals(employee.getId()) && colleague.isActive())
+        return employeeRepository.findByManagerId(fresh.getManager().getId()).stream()
+                .filter(colleague -> !colleague.getId().equals(fresh.getId()) && colleague.isActive())
                 .map(employeeMapper::toResponse)
                 .toList();
+    }
+
+    /**
+     * @CurrentUser injects the Employee loaded by JwtAuthenticationFilter, which runs its own
+     * short-lived repository call with no Hibernate session held open into the controller/service
+     * invocation — so that instance is detached and its lazy associations (department, manager)
+     * cannot be initialized later. Re-fetching by ID here, inside this class's own
+     * @Transactional method, gives back a session-bound instance whose lazy associations resolve
+     * normally. Found via a real LazyInitializationException hitting GET /auth/me locally.
+     */
+    private Employee reattach(Employee employee) {
+        return employeeRepository.findById(employee.getId()).orElse(employee);
     }
 }
