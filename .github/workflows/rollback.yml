@@ -1,0 +1,49 @@
+# Manual-only (SPEC.md "Rollback Strategy"). Backend requires RENDER_API_KEY + RENDER_SERVICE_ID
+# + RENDER_DEPLOY_HOOK secrets; frontend requires VERCEL_TOKEN/VERCEL_ORG_ID/VERCEL_PROJECT_ID.
+name: Rollback
+
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: "What to roll back"
+        required: true
+        type: choice
+        options: [backend, frontend]
+      image_tag:
+        description: "Backend only: GHCR image tag (git SHA) to roll back to"
+        required: false
+      vercel_deployment_url:
+        description: "Frontend only: Vercel deployment URL to promote back to production"
+        required: false
+
+permissions:
+  contents: read
+
+jobs:
+  rollback-backend:
+    if: ${{ github.event.inputs.target == 'backend' }}
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Re-point the Render service at the given image tag and redeploy
+        run: |
+          curl -fsS -X PATCH "https://api.render.com/v1/services/${{ secrets.RENDER_SERVICE_ID }}" \
+            -H "Authorization: Bearer ${{ secrets.RENDER_API_KEY }}" \
+            -H "Content-Type: application/json" \
+            -d "{\"imageUrl\": \"ghcr.io/${{ github.repository }}/backend:${{ github.event.inputs.image_tag }}\"}"
+          curl -fsS -X POST "${{ secrets.RENDER_DEPLOY_HOOK }}"
+
+  rollback-frontend:
+    if: ${{ github.event.inputs.target == 'frontend' }}
+    runs-on: ubuntu-latest
+    environment: production
+    env:
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+    steps:
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - run: npm install -g vercel@latest
+      - run: vercel rollback "${{ github.event.inputs.vercel_deployment_url }}" --token="${{ secrets.VERCEL_TOKEN }}"

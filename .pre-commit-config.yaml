@@ -1,0 +1,54 @@
+# See SPEC.md "Developer Workflow" > Pre-commit Hooks. Install once: `pre-commit install`.
+# CI (.github/workflows/ci.yml) re-runs the equivalent checks so a skipped local hook
+# (`git commit --no-verify`) still gets caught before merge.
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.6.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-merge-conflict
+      - id: check-added-large-files
+        args: ["--maxkb=1000"]
+
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.19.3
+    hooks:
+      - id: gitleaks
+
+  - repo: local
+    hooks:
+      - id: backend-spotless
+        name: backend - spotless format
+        entry: bash -c 'cd backend && mvn -q spotless:apply'
+        language: system
+        files: ^backend/.*\.java$
+        pass_filenames: false
+
+      - id: frontend-eslint
+        name: frontend - eslint --fix
+        entry: bash -c 'cd frontend && npx eslint --fix'
+        language: system
+        files: ^frontend/src/.*\.(ts|tsx)$
+        pass_filenames: false
+
+      - id: frontend-prettier
+        name: frontend - prettier --write
+        entry: bash -c 'cd frontend && npx prettier --write src'
+        language: system
+        files: ^frontend/src/.*\.(ts|tsx|css)$
+        pass_filenames: false
+
+      - id: frontend-tsc
+        name: frontend - tsc --noEmit
+        entry: bash -c 'cd frontend && npx tsc -b --noEmit'
+        language: system
+        files: ^frontend/src/.*\.(ts|tsx)$
+        pass_filenames: false
+
+  - repo: https://github.com/alessandrojcm/commitlint-pre-commit-hook
+    rev: v9.16.0
+    hooks:
+      - id: commitlint
+        stages: [commit-msg]
+        additional_dependencies: ["@commitlint/config-conventional"]

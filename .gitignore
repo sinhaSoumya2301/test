@@ -1,0 +1,26 @@
+# Backend (Maven)
+backend/target/
+*.class
+
+# Frontend (Node)
+frontend/node_modules/
+frontend/dist/
+frontend/coverage/
+frontend/playwright-report/
+frontend/test-results/
+*.tsbuildinfo
+frontend/vite.config.js
+frontend/vite.config.d.ts
+
+# Env / secrets — never commit real values
+.env
+.env.local
+*.local.env
+
+# IDE / OS
+.idea/
+.vscode/
+.DS_Store
+
+# Claude Code project-local settings (personal, not shared)
+.claude/settings.local.json

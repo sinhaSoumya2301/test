@@ -1,0 +1,23 @@
+# Manual only — never scheduled or run on push (SPEC.md "Testing Strategy" > Load Testing).
+# Do not point target_url at the live free-tier Render/Vercel deployment without deliberate intent.
+name: Load test (manual)
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_url:
+        description: "Base URL to target (docker-compose stack or a staging deploy)"
+        required: true
+        default: "http://localhost:8080"
+
+jobs:
+  k6:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run k6 swap-flow script
+        uses: grafana/k6-action@v0.3.1
+        with:
+          filename: load-test/swap-flow.js
+        env:
+          BASE_URL: ${{ github.event.inputs.target_url }}

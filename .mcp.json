@@ -1,0 +1,57 @@
+{
+  "mcpServers": {
+    "filesystem": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "/Users/tanmaysinha/Documents/SoumyaProject"
+      ],
+      "env": {}
+    },
+    "context7": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@upstash/context7-mcp"
+      ],
+      "env": {}
+    },
+    "playwright": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@playwright/mcp@latest"
+      ],
+      "env": {}
+    },
+    "sequential-thinking": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-sequential-thinking"
+      ],
+      "env": {}
+    },
+    "docker": {
+      "type": "stdio",
+      "command": "uvx",
+      "args": [
+        "docker-mcp"
+      ],
+      "env": {}
+    },
+    "homebrew": {
+      "type": "stdio",
+      "command": "brew",
+      "args": [
+        "mcp-server"
+      ],
+      "env": {}
+    }
+  }
+}
