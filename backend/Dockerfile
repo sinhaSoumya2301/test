@@ -1,7 +1,7 @@
 # See /SPEC.md "Local Development" and "Deployment Strategy" — this same image is used for
 # `docker compose up --build` locally and for the GHCR image cd-backend.yml deploys to Render.
 
-FROM maven:3.9-eclipse-temurin-21 AS build
+FROM maven:3-eclipse-temurin-24 AS build
 WORKDIR /app
 
 # Dependencies first so they're cached across builds that only touch src/.
